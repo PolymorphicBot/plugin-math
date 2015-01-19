@@ -2,6 +2,7 @@ import "package:polymorphic_bot/api.dart";
 import "package:math_expressions/math_expressions.dart";
 
 import "dart:math" as Math;
+import "dart:async";
 
 BotConnector bot;
 Parser parser = new Parser();
@@ -27,4 +28,60 @@ void main(_, Plugin plugin) {
       }
     }
   });
+  
+  bot.command("ack", (event) {
+    if (event.args.length != 2) {
+      event.reply("> Usage: ack <m> <n>");
+      return;
+    }
+    int m;
+    int n;
+    
+    try {
+      m = int.parse(event.args[0]);
+      n = int.parse(event.args[1]);
+    } catch (e) {
+      event.reply("> ERROR: ${e}");
+      return;
+    }
+    
+    ackAsync(m, n).then((value) {
+      event.reply("> ack(${m}, ${n}) = ${value}");
+    }).timeout(new Duration(seconds: 60), onTimeout: () {
+      event.reply("> ack(${m}, ${n}) timed out (took over 60 seconds to calculate)");
+    });
+  });
+}
+
+Future<int> ackAsync(int m, int n, {int pergo: 200}) {
+  var stack = <int>[];
+  var completer = new Completer<int>();
+  
+  Function go;
+  
+  go = () {
+    for (var i = 1; i <= pergo; i++) {
+      if (m == 0) {
+        if (stack.isEmpty) {
+          completer.complete(n + 1);
+          return;
+        } else {
+          m = stack.removeLast() - 1;
+          n = n + 1;
+        }
+      } else if (n == 0) {
+        m = m - 1;
+        n = 1;
+      } else {
+        stack.add(m);
+        n = n - 1;
+      }
+    }
+    
+    new Future(go);
+  };
+  
+  new Future(go);
+  
+  return completer.future;
 }
