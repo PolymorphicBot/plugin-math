@@ -7,9 +7,11 @@ import "dart:async";
 BotConnector bot;
 Parser parser = new Parser();
 ContextModel context = new ContextModel();
+Storage acks;
 
 void main(_, Plugin plugin) {
   bot = plugin.getBot();
+  acks = plugin.getStorage("ack");
 
   context.bindVariableName("pi", new Number(Math.PI));
   
@@ -45,10 +47,26 @@ void main(_, Plugin plugin) {
       return;
     }
     
+    var key = "${m},${n}";
+    
+    if (acks.map.containsKey(key)) {
+      event.reply("> ack(${m}, ${n}) = ${acks.get(key)}");
+      return;
+    }
+    
+    bool ping = false;
+    
     ackAsync(m, n).then((value) {
-      event.reply("> ack(${m}, ${n}) = ${value}");
-    }).timeout(new Duration(seconds: 60), onTimeout: () {
-      event.reply("> ack(${m}, ${n}) timed out (took over 60 seconds to calculate)");
+      acks.set(key, value);
+      
+      if (ping) {
+        event.reply("${event.user}: ack(${m}, ${n}) = ${value}");
+      } else {
+        event.reply("> ack(${m}, ${n}) = ${value}");
+      }
+    }).timeout(new Duration(seconds: 30), onTimeout: () {
+      event.reply("> ack(${m}, ${n}) is taking a while to calculate. We are still chugging along though.");
+      ping = true;
     });
   });
 }
@@ -83,5 +101,5 @@ Future<int> ackAsync(int m, int n, {int pergo: 200}) {
   
   new Future(go);
   
-  return completer.future;
+  return completer;
 }
