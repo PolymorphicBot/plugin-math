@@ -31,6 +31,10 @@ void main(_, Plugin plugin) {
     }
   });
   
+  bot.command("ack-calcs", (event) {
+    event.reply("> Still Calculating: ${calculating.map((it) => "ack(" + it.replaceAll(",", ", ") + ")").join(", ")}");
+  });
+  
   bot.command("ack", (event) {
     if (event.args.length != 2) {
       event.reply("> Usage: ack <m> <n>");
@@ -56,7 +60,9 @@ void main(_, Plugin plugin) {
     
     bool ping = false;
     
+    calculating.add(key);
     ackAsync(m, n).then((value) {
+      calculating.remove(key);
       acks.set(key, value);
       
       if (ping) {
@@ -70,6 +76,8 @@ void main(_, Plugin plugin) {
     });
   });
 }
+
+List<String> calculating = [];
 
 Future<int> ackAsync(int m, int n, {int pergo: 200}) {
   var stack = <int>[];
