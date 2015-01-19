@@ -101,5 +101,5 @@ Future<int> ackAsync(int m, int n, {int pergo: 200}) {
   
   new Future(go);
   
-  return completer;
+  return completer.future;
 }
