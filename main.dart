@@ -68,7 +68,7 @@ void factorialCommand(CommandEvent event) {
   int result;
   
   if (factorials.map.containsKey(n.toString())) {
-    result = factorials.get(n.toString());
+    result = factorials.map[n.toString()];
   } else {
     result = factorial(n);
     factorials.set(n.toString(), result);
@@ -101,7 +101,7 @@ void fibCommand(CommandEvent event) {
   int result;
   
   if (fibs.map.containsKey(n.toString())) {
-    result = factorials.get(n.toString());
+    result = factorials.map[n.toString()];
   } else {
     result = fib(n);
     fibs.set(n.toString(), result);
