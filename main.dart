@@ -16,7 +16,7 @@ Plugin plugin;
 @BotInstance()
 BotConnector bot;
 
-void main(_, Plugin plugin) => plugin.load();
+main(args, port) => polymorphic(args, port);
 
 @Start()
 void start() {
