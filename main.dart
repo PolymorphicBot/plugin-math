@@ -66,12 +66,13 @@ void factorialCommand(CommandEvent event) {
   }
   
   int result;
+  var key = n.toString();
   
-  if (factorials.map.containsKey(n.toString())) {
-    result = factorials.map[n.toString()];
+  if (factorials.map[key] != null) {
+    result = factorials.map[key];
   } else {
     result = factorial(n);
-    factorials.set(n.toString(), result);
+    factorials.set(key, result);
   }
   
   if (result.toString().length > 400) {
@@ -98,13 +99,14 @@ void fibCommand(CommandEvent event) {
     return;
   }
   
+  var key = n.toString();
   int result;
   
-  if (fibs.map.containsKey(n.toString())) {
-    result = factorials.map[n.toString()];
+  if (fibs.map[key] != null) {
+    result = factorials.map[key];
   } else {
     result = fib(n);
-    fibs.set(n.toString(), result);
+    fibs.set(key, result);
   }
   
   if (result.toString().length > 400) {
