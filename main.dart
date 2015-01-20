@@ -74,7 +74,12 @@ void factorialCommand(CommandEvent event) {
     factorials.set(n.toString(), result);
   }
   
-  event.reply("> factorial(${result}) = ${result}");
+  if (result.toString().length > 400) {
+    event.reply("> That result is too big to display.");
+    return;
+  }
+  
+  event.reply("> factorial(${n}) = ${result}");
 }
 
 @Command("fib")
@@ -102,7 +107,12 @@ void fibCommand(CommandEvent event) {
     fibs.set(n.toString(), result);
   }
   
-  event.reply("> fib(${result}) = ${result}");
+  if (result.toString().length > 400) {
+    event.reply("> That result is too big to display.");
+    return;
+  }
+  
+  event.reply("> fib(${n}) = ${result}");
 }
 
 @Command("ack-calcs")
