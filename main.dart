@@ -1,13 +1,16 @@
 import "package:polymorphic_bot/api.dart";
 import "package:math_expressions/math_expressions.dart";
 
+import "math.dart";
+
 import "dart:math" as Math;
-import "dart:async";
 
 Parser parser = new Parser();
 ContextModel context = new ContextModel()
   ..bindVariableName("pi", new Number(Math.PI));
 Storage acks;
+Storage fibs;
+Storage factorials;
 
 @PluginInstance()
 Plugin plugin;
@@ -20,6 +23,8 @@ void main(_, Plugin plugin) => plugin.load();
 @Start()
 void start() {
   acks = plugin.getStorage("ack");
+  fibs = plugin.getStorage("fibs");
+  factorials = plugin.getStorage("factorials");
 }
 
 @Command("calc")
@@ -39,10 +44,71 @@ void calc(CommandEvent event) {
   }
 }
 
+@Command("factorial")
+void factorialCommand(CommandEvent event) {
+  if (event.args.length != 1) {
+    event.reply("> Usage: factorial <n>");
+    return;
+  }
+  
+  int n;
+  
+  try {
+    n = int.parse(event.args[0]);
+  } catch (e) {
+    event.reply("> ERROR: Invalid Number.");
+    return;
+  }
+  
+  if (n < 0) {
+    event.reply("> ERROR: Number can't be less than zero.");
+    return;
+  }
+  
+  int result;
+  
+  if (factorials.map.containsKey(n.toString())) {
+    result = factorials.get(n.toString());
+  } else {
+    result = factorial(n);
+    factorials.set(n.toString(), result);
+  }
+  
+  event.reply("> factorial(${result}) = ${result}");
+}
+
+@Command("fib")
+void fibCommand(CommandEvent event) {
+  if (event.args.length != 1) {
+    event.reply("> Usage: fib <n>");
+    return;
+  }
+  
+  int n;
+  
+  try {
+    n = int.parse(event.args[0]);
+  } catch (e) {
+    event.reply("> ERROR: Invalid Number.");
+    return;
+  }
+  
+  int result;
+  
+  if (fibs.map.containsKey(n.toString())) {
+    result = factorials.get(n.toString());
+  } else {
+    result = fib(n);
+    fibs.set(n.toString(), result);
+  }
+  
+  event.reply("> fib(${result}) = ${result}");
+}
+
 @Command("ack-calcs")
 void ackCalcs(CommandEvent event) {
   event.reply(
-      "> Still Calculating: ${calculating.map((it) => "ack(" + it.replaceAll(",", ", ") + ")").join(", ")}");
+      "> Still Calculating: ${calculatingAcks.map((it) => "ack(" + it.replaceAll(",", ", ") + ")").join(", ")}");
 }
 
 @Command("ack")
@@ -71,9 +137,9 @@ void ackCommand(CommandEvent event) {
 
   bool ping = false;
 
-  calculating.add(key);
+  calculatingAcks.add(key);
   ackAsync(m, n).then((value) {
-    calculating.remove(key);
+    calculatingAcks.remove(key);
     acks.set(key, value);
 
     if (ping) {
@@ -88,37 +154,5 @@ void ackCommand(CommandEvent event) {
   });
 }
 
-List<String> calculating = [];
+List<String> calculatingAcks = [];
 
-Future<int> ackAsync(int m, int n, {int pergo: 200}) {
-  var stack = <int>[];
-  var completer = new Completer<int>();
-
-  Function go;
-
-  go = () {
-    for (var i = 1; i <= pergo; i++) {
-      if (m == 0) {
-        if (stack.isEmpty) {
-          completer.complete(n + 1);
-          return;
-        } else {
-          m = stack.removeLast() - 1;
-          n = n + 1;
-        }
-      } else if (n == 0) {
-        m = m - 1;
-        n = 1;
-      } else {
-        stack.add(m);
-        n = n - 1;
-      }
-    }
-
-    new Future(go);
-  };
-
-  new Future(go);
-
-  return completer.future;
-}
