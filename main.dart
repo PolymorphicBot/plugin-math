@@ -25,6 +25,10 @@ void start() {
   acks = plugin.getStorage("ack");
   fibs = plugin.getStorage("fibs");
   factorials = plugin.getStorage("factorials");
+  
+  acks.load();
+  fibs.load();
+  factorials.load();
 }
 
 @Command("calc")
