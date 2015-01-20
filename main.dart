@@ -8,9 +8,7 @@ import "dart:math" as Math;
 Parser parser = new Parser();
 ContextModel context = new ContextModel()
   ..bindVariableName("pi", new Number(Math.PI));
-Storage acks;
-Storage fibs;
-Storage factorials;
+Storage answers;
 
 @PluginInstance()
 Plugin plugin;
@@ -22,13 +20,7 @@ void main(_, Plugin plugin) => plugin.load();
 
 @Start()
 void start() {
-  acks = plugin.getStorage("ack");
-  fibs = plugin.getStorage("fibs");
-  factorials = plugin.getStorage("factorials");
-  
-  acks.load();
-  fibs.load();
-  factorials.load();
+  answers = plugin.getStorage("answers");
 }
 
 @Command("calc")
@@ -70,13 +62,13 @@ void factorialCommand(CommandEvent event) {
   }
   
   int result;
-  var key = n.toString();
+  var calculated = answers.getMapKeys("factorials");
   
-  if (factorials.map[key] != null) {
-    result = factorials.map[key];
+  if (calculated.contains(n)) {
+    result = answers.getMap("factorials")[n];
   } else {
     result = factorial(n);
-    factorials.set(key, result);
+    answers.putInMap("factorials", n, result);
   }
   
   if (result.toString().length > 400) {
@@ -106,11 +98,13 @@ void fibCommand(CommandEvent event) {
   var key = n.toString();
   int result;
   
-  if (fibs.map[key] != null) {
-    result = factorials.map[key];
+  var calculated = answers.getMapKeys("fibs");
+  
+  if (calculated.contains(n)) {
+    result = answers.getMap("fibs")[n];
   } else {
     result = fib(n);
-    fibs.set(key, result);
+    answers.putInMap("fibs", n, result);
   }
   
   if (result.toString().length > 400) {
@@ -145,9 +139,10 @@ void ackCommand(CommandEvent event) {
   }
 
   var key = "${m},${n}";
-
-  if (acks.map.containsKey(key)) {
-    event.reply("> ack(${m}, ${n}) = ${acks.get(key)}");
+  var calculated = answers.getMapKeys("ack");
+  
+  if (calculated.contains(key)) {
+    event.reply("> ack(${m}, ${n}) = ${answers.getMap("ack")[key]}");
     return;
   }
 
@@ -156,7 +151,7 @@ void ackCommand(CommandEvent event) {
   calculatingAcks.add(key);
   ackAsync(m, n).then((value) {
     calculatingAcks.remove(key);
-    acks.set(key, value);
+    answers.putInMap("ack", key, value);
 
     if (ping) {
       event.reply("${event.user}: ack(${m}, ${n}) = ${value}");
