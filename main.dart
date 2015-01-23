@@ -95,11 +95,6 @@ void fibCommand(CommandEvent event) {
     return;
   }
   
-  if (n > 30) {
-    event.reply("> Sorry, generating fibonacci numbers for an input > 30 is not supported.");
-    return;
-  }
-  
   int result;
   
   var calculated = answers.getMapKeys("fibs");
